@@ -15,5 +15,10 @@
             "name": "Ronan Chilvers",
             "email": "ronan@d3r.com"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "Ronanchilvers\\": "src/"
+        }
+    }
 }
