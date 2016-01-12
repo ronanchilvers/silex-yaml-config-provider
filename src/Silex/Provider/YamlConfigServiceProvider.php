@@ -7,14 +7,33 @@ use Silex\ServiceProviderInterface;
 use Symfony\Component\Yaml\Parser as YamlParser;
 
 /**
- * Simple class to provide a config service parsed from a YAML file
+ * Simple class to provide a config service parsed from a YAML file.
  * 
  * @author Ronan Chilvers <ronan@d3r.com>
  */
 class YamlConfigServiceProvider implements ServiceProviderInterface
 {
     /**
-     * Register this provider
+     * The yml filename to parse
+     * 
+     * @var string
+     */
+    protected $filename;
+
+    /**
+     * Class constructor
+     *
+     * @param  string $filename
+     * 
+     * @author Ronan Chilvers <ronan@d3r.com>
+     */
+    public function __construct($filename)
+    {
+        $this->filename = $filename;
+    }
+
+    /**
+     * Register this provider.
      *
      * @param Silex\Application $app
      *
@@ -22,23 +41,23 @@ class YamlConfigServiceProvider implements ServiceProviderInterface
      */
     public function register(Application $app)
     {
-        $app['config.path'] = null;
-
-        $app['config'] = $app->share(function(Application $app) {
-            if (is_null($app['config.path'])) {
-                throw new \RuntimeException('You must provide a valid config path in config.path');
+        if (is_null($this->filename)) {
+            throw new \RuntimeException('You must provide a valid config filename');
+        }
+        if (!file_exists($this->filename)) {
+            throw new \RuntimeException(sprintf('Config path \'%s\' is not valid', $this->filename));
+        }
+        if (!is_readable($this->filename)) {
+            throw new \RuntimeException(sprintf('Config path \'%s\' is not readable', $this->filename));
+        }
+        $parser = new YamlParser();
+        $config = $parser->parse(file_get_contents($this->filename));
+        if (is_array($config) && !empty($config)) {
+            if (isset($app['config']) && is_array($app['config'])) {
+                $config = array_replace_recursive($app['config'], $config);
             }
-            if (!file_exists($app['config.path'])) {
-                throw new \RuntimeException(sprintf('Config path \'%s\' is not valid', $app['config.path']));
-            }
-            if (!is_readable($app['config.path'])) {
-                throw new \RuntimeException(sprintf('Config path \'%s\' is not readable', $app['config.path']));
-            }
-            $parser = new YamlParser();
-            $config = $parser->parse(file_get_contents($app['config.path']));
-
-            return $config;
-        });
+            $app['config'] = $config;
+        }
     }
 
     /**
@@ -51,5 +70,4 @@ class YamlConfigServiceProvider implements ServiceProviderInterface
     public function boot(Application $app)
     {
     }
-
 }
