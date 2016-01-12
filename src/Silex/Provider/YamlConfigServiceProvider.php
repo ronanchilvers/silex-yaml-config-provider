@@ -10,7 +10,7 @@ use Symfony\Component\Yaml\Parser as YamlParser;
  * 
  * @author Ronan Chilvers <ronan@d3r.com>
  */
-class YamlConfigProvider implements ServiceProviderInterface
+class YamlConfigServiceProvider implements ServiceProviderInterface
 {
     /**
      * Register this provider
