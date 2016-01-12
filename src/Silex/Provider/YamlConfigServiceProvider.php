@@ -14,16 +14,16 @@ use Symfony\Component\Yaml\Parser as YamlParser;
 class YamlConfigServiceProvider implements ServiceProviderInterface
 {
     /**
-     * The yml filename to parse
+     * The yml filename to parse.
      * 
      * @var string
      */
     protected $filename;
 
     /**
-     * Class constructor
+     * Class constructor.
      *
-     * @param  string $filename
+     * @param string $filename
      * 
      * @author Ronan Chilvers <ronan@d3r.com>
      */
