@@ -2,6 +2,7 @@
 
 namespace Ronanchilvers\Silex\Provider;
 
+use Silex\Application;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\Yaml\Parser as YamlParser;
 
