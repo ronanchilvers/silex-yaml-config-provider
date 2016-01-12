@@ -2,6 +2,15 @@
     "name": "ronanchilvers/silex-yaml-config-provider",
     "description": "Simple YAML config provider for Silex 1.3+",
     "type": "library",
+    "license": "MIT",
+    "keywords": ["yaml", "silex", "service provider", "config"],
+    "authors": [
+        {
+            "name": "Ronan Chilvers",
+            "email": "ronan@d3r.com",
+            "role": "developer"
+        }
+    ],
     "require": {
         "silex/silex": "^1.3",
         "symfony/yaml": "^3.0"
@@ -9,13 +18,6 @@
     "require-dev": {
         "phpunit/phpunit": "^4.8"
     },
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Ronan Chilvers",
-            "email": "ronan@d3r.com"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "Ronanchilvers\\": "src/"
