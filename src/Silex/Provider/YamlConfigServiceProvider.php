@@ -53,7 +53,7 @@ class YamlConfigServiceProvider implements ServiceProviderInterface
     public function register(Application $app)
     {
         if ($this->cacheDirPath) {
-            $cache = $this->getConfigCacheFactory($app['debug'])->cache($this->cacheDirPath.'/config.cache.php',
+            $cache = $this->getConfigCacheFactory($app['debug'])->cache($this->cacheDirPath.'/config.cache',
                 function (ConfigCacheInterface $cache) {
 
                     $config = $this->loadConfig();
