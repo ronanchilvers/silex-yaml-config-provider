@@ -30,14 +30,24 @@ You can add the provider multiple times if you want to parse multiple files and 
 
 ```php
 $app->register(new \Ronanchilvers\Silex\Provider\YamlConfigServiceProvider(
-    '/path/to/my/yaml/config.base.yml'
+    [
+        '/path/to/my/yaml/config1.yml',
+        '/path/to/my/yaml/config2.yml',
+    ]
 ));
+```
+
+Also you can use caching for your config file(s) for performance:
+
+```php
 $app->register(new \Ronanchilvers\Silex\Provider\YamlConfigServiceProvider(
-    '/path/to/my/yaml/config.production.yml'
+    '/path/to/my/yaml/config.yml',
+    '/path/to/cache/directory'
 ));
 ```
 
 ## Services Exposed
+
 The YamlConfigServiceProvider exposes the following services.
 
 - `config` - The parsed configuration data as an array
