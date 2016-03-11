@@ -4,7 +4,9 @@ namespace Ronanchilvers\Silex\Provider;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
-use Symfony\Component\Yaml\Parser as YamlParser;
+use Symfony\Component\Config\ConfigCacheFactory;
+use Symfony\Component\Config\ConfigCacheInterface;
+use Symfony\Component\Config\FileLocator;
 
 /**
  * Simple class to provide a config service parsed from a YAML file.
@@ -18,56 +20,88 @@ class YamlConfigServiceProvider implements ServiceProviderInterface
      * 
      * @var string
      */
-    protected $filename;
+    protected $filePaths;
+
+    /**
+     * @var ConfigCacheFactory
+     */
+    protected $configCacheFactory;
 
     /**
      * Class constructor.
      *
-     * @param string $filename
-     * 
+     * @param string|array $filePaths
+     * @param string|null  $cacheDirPath
+     *
      * @author Ronan Chilvers <ronan@d3r.com>
      */
-    public function __construct($filename)
+    public function __construct($filePaths = array(), $cacheDirPath = null)
     {
-        $this->filename = $filename;
+        $this->filePaths = (array) $filePaths;
+        $this->cacheDirPath = $cacheDirPath;
     }
 
     /**
      * Register this provider.
      *
-     * @param Silex\Application $app
+     * @param \Silex\Application $app
      *
      * @author Ronan Chilvers <ronan@d3r.com>
+     *
+     * @return mixed
      */
     public function register(Application $app)
     {
-        if (is_null($this->filename)) {
-            throw new \RuntimeException('You must provide a valid config filename');
-        }
-        if (!file_exists($this->filename)) {
-            throw new \RuntimeException(sprintf('Config path \'%s\' is not valid', $this->filename));
-        }
-        if (!is_readable($this->filename)) {
-            throw new \RuntimeException(sprintf('Config path \'%s\' is not readable', $this->filename));
-        }
-        $parser = new YamlParser();
-        $config = $parser->parse(file_get_contents($this->filename));
-        if (is_array($config) && !empty($config)) {
-            if (isset($app['config']) && is_array($app['config'])) {
-                $config = array_replace_recursive($app['config'], $config);
-            }
-            $app['config'] = $config;
+        if ($this->cacheDirPath) {
+            $cache = $this->getConfigCacheFactory($app['debug'])->cache($this->cacheDirPath.'/config.cache.php',
+                function (ConfigCacheInterface $cache) {
+
+                    $config = $this->loadConfig();
+
+                    $cache->write(serialize($config));
+                }
+            );
+
+            $app['config'] = unserialize(file_get_contents($cache->getPath()));
+        } else {
+            $app['config'] = $this->loadConfig();
         }
     }
 
     /**
-     * Boot the provider.
-     *
-     * @param Silex\Application $app
-     *
-     * @author Ronan Chilvers <ronan@d3r.com>
+     * {@inheritdoc}
      */
     public function boot(Application $app)
     {
+    }
+
+    /**
+     * @param bool $debug Is debug mode enabled
+     *
+     * @return ConfigCacheFactory
+     */
+    private function getConfigCacheFactory($debug)
+    {
+        if ($this->configCacheFactory === null) {
+            $this->configCacheFactory = new ConfigCacheFactory($debug);
+        }
+
+        return $this->configCacheFactory;
+    }
+
+    protected function loadConfig()
+    {
+        $paths = array_map(function($filePath) {
+            return dirname($filePath);
+        }, $this->filePaths);
+
+        $loader = new YamlFileLoader(new FileLocator($paths));
+
+        $config = [];
+        foreach ($this->filePaths as $filePath) {
+            $config = array_replace_recursive($config, $loader->load($filePath));
+        }
+
+        return $config;
     }
 }
